@@ -22,7 +22,15 @@
 
 > Você modificou ou expandiu os dados mockados? Descreva aqui.
 
-O produto Fundo Imobiliário (FII) substituiu o Fundo Multimercado, pois pessoalmente me sinto mais confiante em usar apenas produtos financeiros que eu conheço. Assim, poderei validar as respostas do Edu de forma mais assertiva.
+As seguintes adaptações foram realizadas:
+
+1. **Perfil do cliente:** João Silva foi substituído por **Ana Lima**, 28 anos, Designer Gráfica, renda R$ 4.500, perfil conservador. As metas foram atualizadas para refletir objetivos mais próximos de um iniciante: completar reserva de emergência (6x salário = R$ 27.000), viagem internacional e curso de especialização.
+
+2. **Transações:** Expandidas de 10 linhas (apenas outubro) para **38 linhas cobrindo 3 meses** (agosto, setembro e outubro), com categorias mais variadas incluindo `poupanca`, `beleza` e `educacao`. Isso permite que o Edu faça análises de tendência entre meses.
+
+3. **Histórico de atendimento:** Atualizado para refletir os temas de interesse da Ana Lima (reserva de emergência, CDB, Tesouro Selic), mantendo a estrutura original.
+
+4. **Produto Fundo Imobiliário (FII):** Mantido em substituição ao Fundo Multimercado original, por ser um produto amplamente conhecido e validável.
 
 ---
 
@@ -37,10 +45,16 @@ Existem duas possibilidades, injetar os dados diretamente no prompt (Ctrl + C, C
 import pandas as pd
 import json
 
-perfil = json.load(open('./data/perfil_investidor.json'))
-transacoes = pd.read_csv('./data/transacoes.csv')
-historico = pd.read_csv('./data/historico_atendimento.csv')
-produtos = json.load(open('./data/produtos_financeiros.json'))
+import os
+
+BASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+
+with open(os.path.join(BASE_DIR, "perfil_investidor.json"), encoding="utf-8") as f:
+    perfil = json.load(f)
+transacoes = pd.read_csv(os.path.join(BASE_DIR, "transacoes.csv"))
+historico = pd.read_csv(os.path.join(BASE_DIR, "historico_atendimento.csv"))
+with open(os.path.join(BASE_DIR, "produtos_financeiros.json"), encoding="utf-8") as f:
+    produtos = json.load(f)
 ```
 
 ### Como os dados são usados no prompt?
@@ -146,27 +160,32 @@ PRODUTOS DISPONIVEIS PARA ENSINO (data/produtos_financeiros.json):
 
 > Mostre um exemplo de como os dados são formatados para o agente.
 
-O exemplo de contexto montado abaixo, se baiseia nos dados originais da base de conhecimento, mas os sintetiza deixando apenas as informações mais relevantes, otimizando assim o consumo de tokens. Entretanto, vale lembrar que mais importante do que economizar tokens, é ter todas as informações relevantes disponíveis em seu contexto.
+O contexto é injetado diretamente no prompt, contendo todas as informações relevantes da Ana Lima. Histórico de conversa multi-turno é mantido no `st.session_state` e incluído no prompt a cada nova mensagem.
 
 ```
 DADOS DO CLIENTE:
-- Nome: João Silva
-- Perfil: Moderado
-- Objetivo: Construir reserva de emergência
-- Reserva atual: R$ 10.000 (meta: R$ 15.000)
+- Nome: Ana Lima, 28 anos, Designer Gráfica
+- Renda: R$ 4.500 | Perfil: Conservador
+- Objetivo: Construir reserva de emergência e começar a investir
+- Patrimônio: R$ 8.000 | Reserva atual: R$ 5.000
+- Metas:
+  - Completar reserva de emergência (6x salário): R$ 27.000 até 2027-06
+  - Viagem internacional: R$ 8.000 até 2026-12
+  - Curso de especialização: R$ 5.000 até 2026-08
 
-RESUMO DE GASTOS:
-- Moradia: R$ 1.380
-- Alimentação: R$ 570
-- Transporte: R$ 295
-- Saúde: R$ 188
-- Lazer: R$ 55,90
-- Total de saídas: R$ 2.488,90
+RESUMO DE GASTOS (outubro/2025):
+- Moradia: R$ 1.137,90 (aluguel + luz + internet)
+- Alimentação: R$ 490,00 (supermercado + restaurante)
+- Transporte: R$ 226,00 (combustível + Uber)
+- Saúde: R$ 121,00 (academia + farmácia)
+- Lazer: R$ 55,90 (Netflix)
+- Poupança: R$ 500,00
+- Total de saídas: R$ 2.530,80
 
 PRODUTOS DISPONÍVEIS PARA EXPLICAR:
-- Tesouro Selic (risco baixo)
-- CDB Liquidez Diária (risco baixo)
-- LCI/LCA (risco baixo)
+- Tesouro Selic (risco baixo) — ideal para reserva de emergência
+- CDB Liquidez Diária (risco baixo) — ótimo ponto de partida
+- LCI/LCA (risco baixo) — isento de IR após 90 dias
 - Fundo Imobiliário - FII (risco médio)
 - Fundo de Ações (risco alto)
 ```

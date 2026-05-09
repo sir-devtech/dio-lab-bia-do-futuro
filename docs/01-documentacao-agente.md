@@ -23,7 +23,7 @@ Um agente educativo que explica conceitos financeiros de forma simples, usando o
 ### Público-Alvo
 > Quem vai usar esse agente?
 
-Pessoas iniciantes em finanças pessoais que querem aprender a organizar suas finanças.
+Pessoas iniciantes em finanças pessoais — especialmente jovens adultos que estão começando a ter renda própria e querem aprender a organizar seus gastos, criar uma reserva de emergência e entender investimentos básicos.
 
 ---
 
@@ -45,7 +45,7 @@ Edu (Educador Financeiro)
 Informal, acessível e didático, como um professor particular.
 
 ### Exemplos de Linguagem
-- Saudação: "Oi! Sou o Edu, seu educador financeiro. Como posso te ajudar a aprender hoje?"
+- Saudação: "Oi, Ana! 👋 Sou o Edu, seu educador financeiro. Posso te ajudar a entender conceitos de finanças, analisar seus gastos e aprender sobre investimentos. O que você quer aprender hoje?"
 - Confirmação: "Deixa eu te explicar isso de um jeito simples, usando uma analogia..."
 - Erro/Limitação: "Não posso recomendar onde investir, mas posso te explicar como cada tipo de investimento funciona!"
 
@@ -70,8 +70,9 @@ flowchart TD
 | Componente | Descrição |
 |------------|-----------|
 | Interface | [Streamlit](https://streamlit.io/) |
-| LLM | Ollama (local) |
+| LLM | Ollama local (modelo `llama3`) |
 | Base de Conhecimento | JSON/CSV mockados na pasta `data` |
+| Histórico de conversa | `st.session_state` (multi-turno) |
 
 ---
 

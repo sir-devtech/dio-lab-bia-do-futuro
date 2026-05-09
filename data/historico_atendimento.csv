@@ -1,6 +1,7 @@
 data,canal,tema,resumo,resolvido
-2025-09-15,chat,CDB,Cliente perguntou sobre rentabilidade e prazos,sim
-2025-09-22,telefone,Problema no app,Erro ao visualizar extrato foi corrigido,sim
-2025-10-01,chat,Tesouro Selic,Cliente pediu explicação sobre o funcionamento do Tesouro Direto,sim
-2025-10-12,chat,Metas financeiras,Cliente acompanhou o progresso da reserva de emergência,sim
-2025-10-25,email,Atualização cadastral,Cliente atualizou e-mail e telefone,sim
+2025-08-10,chat,Tesouro Selic,Cliente perguntou sobre como funciona o Tesouro Selic para reserva de emergencia,sim
+2025-08-25,chat,Reserva de emergencia,Cliente queria entender quanto guardar por mes para atingir a meta,sim
+2025-09-05,telefone,Aplicativo,Cliente teve dificuldade para acessar extrato no app mobile,sim
+2025-09-22,chat,CDB,Cliente perguntou sobre diferenca entre CDB e Tesouro Selic,sim
+2025-10-01,chat,Metas financeiras,Cliente acompanhou o progresso da reserva de emergencia e perguntou sobre viagem,sim
+2025-10-18,email,Atualizacao cadastral,Cliente atualizou telefone e endereco,sim

@@ -44,7 +44,7 @@ Mais sobre Few-Shot Prompts no artigo [Zero, One e Few-Shot Prompts: Entendendo 
 
 **Usuário:** "Onde estou gastando mais?"
 
-**Edu:** "Olhando suas transações de outubro, sua maior despesa é moradia (R$ 1.380), seguida de alimentação (R$ 570). Juntas, representam quase 80% dos seus gastos. Isso é bem comum! Quer que eu explique algumas estratégias de organização?"
+**Edu:** "Olhando suas transações de outubro, Ana, sua maior despesa é moradia (R$ 1.137,90), seguida de alimentação (R$ 490). Juntas representam quase 65% das suas saídas. Você também está colocando R$ 500 na poupança — parabéns pela consistência! Quer que eu te explique como esse hábito vai te ajudar a atingir sua reserva de emergência?"
 
 ---
 
@@ -52,7 +52,7 @@ Mais sobre Few-Shot Prompts no artigo [Zero, One e Few-Shot Prompts: Entendendo 
 
 **Usuário:** "Devo investir em ações?"
 
-**Edu:** "Não posso te dizer se você *deve*, mas posso explicar como funciona! Ações são pedaços de empresas, você vira sócio. O risco é alto porque o preço varia muito. Seu perfil está como 'moderado', então vale entender bem antes de decidir. Quer saber mais sobre risco?"
+**Edu:** "Não posso te dizer se você *deve*, mas posso explicar como funciona! Ações são pedaços de empresas — você vira sócia. O risco é alto porque o preço varia bastante. Considerando que seu perfil é *conservador* e você ainda está construindo sua reserva de emergência, vale entender bem a sua tolerância a risco antes de qualquer passo. Quer saber mais sobre como funciona o risco nos investimentos?"
 
 
 ---
@@ -87,4 +87,7 @@ Mais sobre Few-Shot Prompts no artigo [Zero, One e Few-Shot Prompts: Entendendo 
 
 > Registre aqui ajustes que você fez nos prompts e por quê.
 
-- Registramos que existem diferenças significativas no uso de diferentes LLMs. Por exemplo, ao usar o ChatGPT, Copilot e Claude tivemos comportamentos similares com o mesmo System Prompt, mas cada um deles deu respostas em padrões distintos. Na prática, todos se sairam bem, mas o ChatGPT se perdeu Edge Case de "Pergunta fora do escopo" (Qual a previsão do tempo para amanhã?).
+- **Modelo utilizado:** `llama3` via Ollama local. O comportamento é mais direto e menos verbose que modelos via API cloud, o que se alinha bem com a regra de "no máximo 3 parágrafos".
+- **Ajuste no contexto:** O contexto passou a incluir histórico de conversa multi-turno (via `st.session_state`), o que eliminou respostas sem continuidade entre mensagens. Antes, o agente respondia cada pergunta como se fosse a primeira.
+- **Personalização por nome:** Incluir o nome da cliente (Ana) no contexto fez o agente gerar respostas mais naturais e personalizadas sem instrução adicional.
+- **Edge cases:** O llama3 lida bem com perguntas fora do escopo e rejeição de recomendações, mantendo-se dentro das regras do system prompt na maioria das interações testadas.

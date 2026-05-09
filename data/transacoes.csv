@@ -1,11 +1,39 @@
 data,descricao,categoria,valor,tipo
-2025-10-01,Salário,receita,5000.00,entrada
-2025-10-02,Aluguel,moradia,1200.00,saida
-2025-10-03,Supermercado,alimentacao,450.00,saida
+2025-08-01,Salário,receita,4500.00,entrada
+2025-08-02,Aluguel,moradia,900.00,saida
+2025-08-03,Supermercado,alimentacao,380.00,saida
+2025-08-06,Farmácia,saude,45.00,saida
+2025-08-07,Spotify,lazer,21.90,saida
+2025-08-10,Restaurante,alimentacao,85.00,saida
+2025-08-12,Uber,transporte,38.00,saida
+2025-08-15,Conta de Luz,moradia,130.00,saida
+2025-08-18,Internet,moradia,99.90,saida
+2025-08-20,Academia,saude,89.00,saida
+2025-08-22,Salão,beleza,120.00,saida
+2025-08-25,Combustivel,transporte,200.00,saida
+2025-08-28,Freelance design,receita,800.00,entrada
+2025-09-01,Salário,receita,4500.00,entrada
+2025-09-02,Aluguel,moradia,900.00,saida
+2025-09-03,Supermercado,alimentacao,420.00,saida
+2025-09-05,Netflix,lazer,55.90,saida
+2025-09-08,Farmácia,saude,67.00,saida
+2025-09-10,Restaurante,alimentacao,110.00,saida
+2025-09-13,Uber,transporte,52.00,saida
+2025-09-15,Conta de Luz,moradia,145.00,saida
+2025-09-18,Internet,moradia,99.90,saida
+2025-09-20,Academia,saude,89.00,saida
+2025-09-22,Curso online,educacao,197.00,saida
+2025-09-25,Combustivel,transporte,210.00,saida
+2025-09-28,Reserva de emergencia,poupanca,500.00,saida
+2025-10-01,Salário,receita,4500.00,entrada
+2025-10-02,Aluguel,moradia,900.00,saida
+2025-10-03,Supermercado,alimentacao,395.00,saida
 2025-10-05,Netflix,lazer,55.90,saida
-2025-10-07,Farmácia,saude,89.00,saida
-2025-10-10,Restaurante,alimentacao,120.00,saida
-2025-10-12,Uber,transporte,45.00,saida
-2025-10-15,Conta de Luz,moradia,180.00,saida
-2025-10-20,Academia,saude,99.00,saida
-2025-10-25,Combustível,transporte,250.00,saida
+2025-10-07,Farmácia,saude,32.00,saida
+2025-10-10,Restaurante,alimentacao,95.00,saida
+2025-10-12,Uber,transporte,41.00,saida
+2025-10-15,Conta de Luz,moradia,138.00,saida
+2025-10-18,Internet,moradia,99.90,saida
+2025-10-20,Academia,saude,89.00,saida
+2025-10-23,Combustivel,transporte,185.00,saida
+2025-10-28,Reserva de emergencia,poupanca,500.00,saida
