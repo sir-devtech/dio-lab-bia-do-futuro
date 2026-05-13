@@ -110,6 +110,15 @@ PRODUTOS DISPONÍVEIS PARA ENSINAR:
 {produtos_txt}
 """
 
+# Contexto reduzido para chamadas ao LLM (sem tabela de transações)
+contexto_llm = (
+    f"Cliente: {perfil['nome']}, {perfil['idade']} anos, perfil {perfil['perfil_investidor']}. "
+    f"Renda: R$ {perfil['renda_mensal']}. "
+    f"Objetivo: {perfil['objetivo_principal']}. "
+    f"Reserva atual: R$ {perfil['reserva_emergencia_atual']} de R$ {perfil['metas'][0]['valor_necessario']}. "
+    f"Gastos recentes: {resumo_txt.replace(chr(10), '; ')}"
+)
+
 # ============ SYSTEM PROMPT ============
 SYSTEM_PROMPT = """Você é o Edu, um educador financeiro amigável e didático.
 
@@ -154,7 +163,7 @@ def detectar_mes(pergunta: str):
 
 def responder_gastos(pergunta: str) -> str | None:
     pergunta_normalizada = pergunta.lower()
-    if "quanto gastei" not in pergunta_normalizada and "onde estou gastando mais" not in pergunta_normalizada:
+    if "quanto gastei" not in pergunta_normalizada and "gastando mais" not in pergunta_normalizada:
         return None
 
     categoria = detectar_categoria(pergunta_normalizada)
@@ -163,7 +172,7 @@ def responder_gastos(pergunta: str) -> str | None:
     gastos = transacoes[transacoes["tipo"] == "saida"].copy()
     gastos_mes = gastos[gastos["data"].dt.month == mes]
 
-    if "onde estou gastando mais" in pergunta_normalizada:
+    if "gastando mais" in pergunta_normalizada:
         if gastos_mes.empty:
             return "Não encontrei gastos para esse período, mas posso te ajudar a analisar outro mês."
         totais = gastos_mes.groupby("categoria")["valor"].sum().sort_values(ascending=False)
@@ -210,8 +219,36 @@ def responder_ativo_desconhecido() -> str:
     return "Não tenho essa informação na minha base atual. Posso explicar como avaliar um ativo ou falar dos produtos que estão no seu contexto."
 
 
+RESPOSTAS_EDUCATIVAS = {
+    "cdi": (
+        "O CDI — Certificado de Depósito Interbancário — é uma taxa usada pelos bancos para emprestar dinheiro entre si. "
+        "Na prática, ele funciona como referência para investimentos de renda fixa: CDBs, LCIs, LCAs e fundos DI costumam render um percentual do CDI. "
+        "Por exemplo, um CDB que rende 100% do CDI vai render praticamente o mesmo que a taxa básica de juros. "
+        "Para você, Ana, que tem perfil conservador, investimentos atrelados ao CDI são uma boa base para a reserva de emergência. "
+        "Entendeu? Quer que eu explique como comparar produtos que rendem % do CDI?"
+    ),
+    "tesouro selic": (
+        "O Tesouro Selic é um título público emitido pelo governo federal. Quando você compra, está emprestando dinheiro para o governo e recebendo juros. "
+        "Ele acompanha a taxa Selic — a taxa básica de juros do Brasil — e tem liquidez diária, ou seja, você pode resgatar quando quiser sem perder rendimento. "
+        "Para quem está montando reserva de emergência, como você Ana, o Tesouro Selic é uma das opções mais seguras e acessíveis: dá pra começar com R$ 30. "
+        "A principal vantagem: segurança máxima (garantido pelo governo) com rendimento bem acima da poupança. "
+        "Quer saber como comprar pelo Tesouro Direto?"
+    ),
+    "reserva de emergência": (
+        "Reserva de emergência é um valor guardado para cobrir imprevistos — perda de emprego, doença, conserto urgente — sem precisar pegar empréstimo. "
+        "A regra geral é ter de 3 a 6 meses de gastos mensais guardados. Com sua renda de R$ 4.500, isso seria entre R$ 13.500 e R$ 27.000. "
+        f"Você já tem R$ {perfil['reserva_emergencia_atual']:,.0f} guardados — são {(perfil['reserva_emergencia_atual']/perfil['metas'][0]['valor_necessario']*100):.0f}% da sua meta de R$ {perfil['metas'][0]['valor_necessario']:,.0f}. Ótimo progresso! "
+        "O ideal é deixar essa reserva em investimentos com liquidez diária, como Tesouro Selic ou CDB de liquidez diária. "
+        "Quer dicas de como acelerar essa meta?"
+    ),
+}
+
 def resposta_deterministica(pergunta: str) -> str | None:
     pergunta_normalizada = pergunta.lower().strip()
+
+    for chave, resposta in RESPOSTAS_EDUCATIVAS.items():
+        if chave in pergunta_normalizada:
+            return resposta
 
     if any(termo in pergunta_normalizada for termo in ["previsão do tempo", "previsao do tempo", "clima", "tempo amanhã", "tempo amanha"]):
         return responder_fora_do_escopo()
@@ -225,13 +262,9 @@ def resposta_deterministica(pergunta: str) -> str | None:
     return responder_gastos(pergunta_normalizada)
 
 
-# ============ CHAMAR OLLAMA ============
-def perguntar(historico_msgs: list[dict], nova_pergunta: str) -> str:
-    """Responde de forma determinística quando possível; caso contrário, usa o LLM."""
-    resposta_imediata = resposta_deterministica(nova_pergunta)
-    if resposta_imediata:
-        return resposta_imediata
-
+# ============ CHAMAR OLLAMA (STREAMING) ============
+def stream_resposta(historico_msgs: list[dict], nova_pergunta: str):
+    """Gerador que produz tokens do LLM um a um para streaming no Streamlit."""
     historico_txt = ""
     for msg in historico_msgs[-4:]:
         role = "Usuário" if msg["role"] == "user" else "Edu"
@@ -239,8 +272,8 @@ def perguntar(historico_msgs: list[dict], nova_pergunta: str) -> str:
 
     prompt = (
         f"{SYSTEM_PROMPT}\n\n"
-        f"CONTEXTO DO CLIENTE:\n{contexto}\n\n"
-        f"HISTÓRICO DA CONVERSA:\n{historico_txt}\n"
+        f"CONTEXTO:\n{contexto_llm}\n\n"
+        f"HISTÓRICO:\n{historico_txt}\n"
         f"Usuário: {nova_pergunta}\nEdu:"
     )
 
@@ -250,28 +283,30 @@ def perguntar(historico_msgs: list[dict], nova_pergunta: str) -> str:
             json={
                 "model": MODELO,
                 "prompt": prompt,
-                "stream": False,
+                "stream": True,
                 "options": {
                     "temperature": 0.2,
-                    "num_predict": 140,
+                    "num_predict": 120,
                 },
             },
-            timeout=45,
+            stream=True,
+            timeout=90,
         )
         r.raise_for_status()
-        return r.json()["response"]
+        for line in r.iter_lines():
+            if line:
+                chunk = json.loads(line)
+                token = chunk.get("response", "")
+                if token:
+                    yield token
+                if chunk.get("done", False):
+                    break
     except requests.exceptions.ReadTimeout:
-        return (
-            "⚠️ O modelo demorou além do esperado. Tente uma pergunta mais curta ou use perguntas sobre "
-            "gastos, reserva de emergência e produtos básicos."
-        )
+        yield "⚠️ O modelo demorou além do esperado. Tente uma pergunta mais curta."
     except requests.exceptions.ConnectionError:
-        return (
-            "⚠️ Não consegui conectar ao Ollama. Verifique se ele está rodando com "
-            "`ollama serve` e tente novamente."
-        )
+        yield "⚠️ Não consegui conectar ao Ollama. Verifique se ele está rodando com `ollama serve`."
     except Exception as e:
-        return f"⚠️ Erro inesperado ao chamar o modelo: {e}"
+        yield f"⚠️ Erro inesperado: {e}"
 
 def main():
     st.set_page_config(page_title="Edu — Educador Financeiro", page_icon="🎓")
@@ -311,11 +346,20 @@ def main():
         st.session_state.messages.append({"role": "user", "content": nova_pergunta})
         st.chat_message("user").write(nova_pergunta)
 
-        with st.spinner("Edu está pensando..."):
-            resposta = perguntar(st.session_state.messages[:-1], nova_pergunta)
-
-        st.session_state.messages.append({"role": "assistant", "content": resposta})
-        st.chat_message("assistant").write(resposta)
+        resposta_imediata = resposta_deterministica(nova_pergunta)
+        if resposta_imediata:
+            import time
+            def _stream_texto(texto):
+                for palavra in texto.split(" "):
+                    yield palavra + " "
+                    time.sleep(0.04)
+            with st.chat_message("assistant"):
+                resposta = st.write_stream(_stream_texto(resposta_imediata))
+            st.session_state.messages.append({"role": "assistant", "content": resposta})
+        else:
+            with st.chat_message("assistant"):
+                resposta = st.write_stream(stream_resposta(st.session_state.messages[:-1], nova_pergunta))
+            st.session_state.messages.append({"role": "assistant", "content": resposta})
 
 
 if __name__ == "__main__":
